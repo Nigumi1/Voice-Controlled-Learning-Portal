@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Portal Login/Register</title>
+  <script src="https://cdn.jsdelivr.net/npm/vue@3/dist/vue.global.min.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body class="bg-gradient-to-br from-blue-900 to-blue-800 min-h-screen flex items-center justify-center">
+
+<div id="app" class="w-full max-w-md bg-white rounded-lg shadow-lg p-6">
+  <!-- Tabs for navigation -->
+  <div class="flex mb-6">
+    <div 
+      class="flex-1 text-center py-2 cursor-pointer border-b-2" 
+      :class="{'border-blue-600 text-blue-600': currentPage === 'login', 'border-gray-300': currentPage !== 'login'}"
+      @click="currentPage = 'login'">
+      Login
+    </div>
+    <div 
+      class="flex-1 text-center py-2 cursor-pointer border-b-2" 
+      :class="{'border-blue-600 text-blue-600': currentPage === 'register', 'border-gray-300': currentPage !== 'register'}"
+      @click="currentPage = 'register'">
+      Register
+    </div>
+  </div>
+
+  <!-- Dynamic Component Rendering -->
+  <component :is="currentPage"></component>
+</div>
+
+<script>
+  // Login Component
+  const Login = {
+    template: `
+      <form @submit.prevent="handleSubmit" class="space-y-4">
+        <div>
+          <label for="loginEmail" class="block text-sm font-medium text-gray-700">Email</label>
+          <input type="email" id="email" v-model="email" required 
+            class="mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+        </div>
+        <div>
+          <label for="loginPassword" class="block text-sm font-medium text-gray-700">Password</label>
+          <input type="password" id="password" v-model="password" required 
+            class="mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+        </div>
+        <button 
+        type="submit" 
+        :disabled="loading" 
+        class="w-full py-2 bg-blue-800 text-white rounded-md hover:bg-blue-700 flex justify-center items-center">
+        <span v-if="!loading">Login</span>
+        <span v-else>
+          <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+          </svg>
+        </span>
+      </button>
+      </form>
+    `,
+
+    data () {
+      return {
+        email: '',
+        password: '',
+        loading: false // State to control the spinner
+      }
+    },
+    methods: {
+      async handleSubmit() {
+        this.loading = true;
+
+        try {
+          const response = await axios.post('action/login.php', {
+            email: this.email,
+            password: this.password
+          });
+
+          console.log(response.data);
+          console.log(email);
+
+          if (response.data.status === 'success') {
+            window.location.href = 'index.php';
+          } else {
+            await Swal.fire({
+              icon: 'error',
+              title: 'Login Failed',
+              text: response.data.message
+            });
+            this.loading = false;
+          }
+        } catch (error) {
+          console.error(error);
+          await Swal.fire({
+            icon: 'error',
+            title: 'Login Failed',
+            text: 'An error occurred during login.'
+          });
+          this.loading = false;
+        }
+      }
+    }
+  };
+
+  // Register Component
+  const Register = {
+    template:`
+      <form @submit.prevent="handleSubmit" class="space-y-4">
+        <div class="flex space-x-2">
+          <div class="flex-1">
+            <label for="fname" class="block text-sm font-medium text-gray-700">First Name</label>
+            <input type="text" id="fname" v-model="fname" required
+              class="mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+          </div>
+          <div class="flex-1">
+            <label for="mname" class="block text-sm font-medium text-gray-700">Middle Name</label>
+            <input type="text" id="mname" v-model="mname" 
+              class="mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+          </div>
+          <div class="flex-1">
+            <label for="lname" class="block text-sm font-medium text-gray-700">Last Name</label>
+            <input type="text" id="lname" v-model="lname" required
+              class="mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+          </div>
+        </div>
+
+      <div>
+        <label for="regEmail" class="block text-sm font-medium text-gray-700">Email</label>
+        <input type="email" id="regEmail" v-model="email" required
+          class="mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+      </div>
+      <div>
+        <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+        <input type="password" id="password" v-model="password" required 
+          class="mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+      </div>
+      <div>
+        <label for="repeatPassword" class="block text-sm font-medium text-gray-700">Confirm Password</label>
+        <input type="password" id="repeatPassword" v-model="repeatPassword" required
+          class="mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500">
+      </div>
+
+      <!-- Password validation message -->
+      <div id="message" class="mt-4 p-4 rounded-lg bg-gray-50 shadow-md border border-gray-200">
+        <h3 class="text-lg font-semibold text-gray-800 mb-2">Password must contain the following:</h3>
+        <p id="letter" class="flex items-center text-gray-600 mb-1">
+          <svg class="w-5 h-5 mr-2 text-red-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+          A <b class="ml-1">lowercase</b> letter
+        </p>
+        <p id="capital" class="flex items-center text-gray-600 mb-1">
+          <svg class="w-5 h-5 mr-2 text-red-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+          A <b class="ml-1">capital (uppercase)</b> letter
+        </p>
+        <p id="number" class="flex items-center text-gray-600 mb-1">
+          <svg class="w-5 h-5 mr-2 text-red-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+          A <b class="ml-1">number</b>
+        </p>
+        <p id="length" class="flex items-center text-gray-600 mb-1">
+          <svg class="w-5 h-5 mr-2 text-red-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+          Minimum <b class="ml-1">8 characters</b>
+        </p>
+      </div>
+      
+      <p id="matchMessage" class="text-red-500 text-sm mt-2 hidden">Passwords do not match</p>
+      <p id="lengthMessage" class="text-red-500 text-sm mt-2 hidden">Password must be at least 8 characters long</p>
+      <p id="lowercaseMessage" class="text-red-500 text-sm mt-2 hidden">Password must contain at least one lowercase letter</p>
+      <p id="uppercaseMessage" class="text-red-500 text-sm mt-2 hidden">Password must contain at least one uppercase letter</p>
+      <p id="numberMessage" class="text-red-500 text-sm mt-2 hidden">Password must contain at least one number</p>
+
+      <button 
+        type="submit" 
+        :disabled="loading" 
+        class="w-full py-2 bg-blue-800 text-white rounded-md hover:bg-blue-700 flex justify-center items-center">
+        <span v-if="!loading">Register</span>
+        <span v-else>
+          <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+          </svg>
+        </span>
+      </button>
+    </form>
+  `,
+    data() {
+      return {
+        fname: '',
+        mname: '',
+        lname: '',
+        email: '',
+        password: '',
+        repeatPassword: '',
+        loading: false
+      };
+    },
+
+    methods: {
+      async handleSubmit() {
+        this.loading = true;
+        let isValid = true;
+
+        // Reset error messages
+        document.getElementById("matchMessage").classList.add("hidden");
+        document.getElementById("lengthMessage").classList.add("hidden");
+        document.getElementById("lowercaseMessage").classList.add("hidden");
+        document.getElementById("uppercaseMessage").classList.add("hidden");
+        document.getElementById("numberMessage").classList.add("hidden");
+
+        // Check if passwords match
+        if (this.password !== this.repeatPassword) {
+          document.getElementById("matchMessage").classList.remove("hidden");
+          isValid = false;
+        }
+
+        // Check password length
+        if (this.password.length < 8) {
+          document.getElementById("lengthMessage").classList.remove("hidden");
+          isValid = false;
+        }
+
+        // Check for lowercase letter
+        if (!/[a-z]/.test(this.password)) {
+          document.getElementById("lowercaseMessage").classList.remove("hidden");
+          isValid = false;
+        }
+
+        // Check for uppercase letter
+        if (!/[A-Z]/.test(this.password)) {
+          document.getElementById("uppercaseMessage").classList.remove("hidden");
+          isValid = false;
+        }
+
+        // Check for number
+        if (!/[0-9]/.test(this.password)) {
+          document.getElementById("numberMessage").classList.remove("hidden");
+          isValid = false;
+        }
+
+        // Stop submission if invalid
+        if (!isValid) {
+          this.loading = false;
+          return;
+        }
+    
+        try {
+          const response = await axios.post('action/register.php', {
+            fname: this.fname,
+            mname: this.mname,
+            lname: this.lname,
+            email: this.email,
+            password: this.password,
+          });
+          console.log(response.data);
+          if (response.data.status === 'success') {
+            await Swal.fire({
+              icon: 'success',
+              title: 'Success!',
+              text: response.data.message,
+            });
+
+            // Clear form fields
+            this.fname = '';
+            this.mname = '';
+            this.lname = '';
+            this.email = '';
+            this.password = '';
+            this.repeatPassword = '';
+            this.loading = false;
+          } else {
+            await Swal.fire({
+              icon: 'error',
+              title: 'Error',
+              text: response.data.message,
+            });
+            this.loading = false;
+          }
+        } catch (error) {
+          console.error('Error:', error);
+          await Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'An error occurred. Please try again later.',
+          });
+          this.loading = false;
+        }
+      },
+    },
+    mounted() {
+      const myInput = document.getElementById('password');
+      const repeatPassword = document.getElementById('repeatPassword');
+      const letter = document.getElementById('letter');
+      const capital = document.getElementById('capital');
+      const number = document.getElementById('number');
+      const length = document.getElementById('length');
+      const matchMessage = document.getElementById('matchMessage');
+
+      myInput.onfocus = function () {
+        document.getElementById('message').style.display = 'block';
+      };
+
+      myInput.onblur = function () {
+        document.getElementById('message').style.display = 'none';
+      };
+
+      myInput.onkeyup = function () {
+        // Validate lowercase letters
+        const lowerCaseLetters = /[a-z]/g;
+        letter.querySelector('svg').style.color = lowerCaseLetters.test(myInput.value) ? 'green' : 'red';
+
+        // Validate capital letters
+        const upperCaseLetters = /[A-Z]/g;
+        capital.querySelector('svg').style.color = upperCaseLetters.test(myInput.value) ? 'green' : 'red';
+
+        // Validate numbers
+        const numbers = /[0-9]/g;
+        number.querySelector('svg').style.color = numbers.test(myInput.value) ? 'green' : 'red';
+
+        // Validate length
+        length.querySelector('svg').style.color = myInput.value.length >= 8 ? 'green' : 'red';
+
+        checkPasswordMatch();
+      };
+
+      repeatPassword.onkeyup = checkPasswordMatch;
+
+      function checkPasswordMatch() {
+        matchMessage.classList.toggle('hidden', myInput.value === repeatPassword.value);
+      }
+    },
+  };
+
+  // Vue App
+  const app = Vue.createApp({
+    data() {
+      return {
+        currentPage: 'login' // Default page
+      };
+    },
+    components: {
+      login: Login,
+      register: Register
+    }
+  });
+
+  app.mount('#app');
+</script>
+
+</body>
+</html>
